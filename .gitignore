@@ -1,0 +1,8 @@
+.DS_Store
+build/
+prefix/
+*.dll
+*.so
+*.exe
+*.dmp
+*.log
