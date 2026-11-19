@@ -1,0 +1,58 @@
+--- a/dlls/user32/input.c
++++ b/dlls/user32/input.c
+@@ -26,11 +26,26 @@
+ 
+ #include "user_private.h"
+ #include "dbt.h"
++#include "ntgdi.h"
+ #include "wine/debug.h"
+ #include "wine/plugplay.h"
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(win);
+ WINE_DECLARE_DEBUG_CHANNEL(keyboard);
++
++UINT WINAPI SendInput(UINT count, INPUT *input, int size)
++{
++    if (input && count && size == sizeof(*input) && GetEnvironmentVariableW(L"UU_MAC_INPUT", NULL, 0))
++    {
++        HDC dc = NtUserGetDC(0);
++        UINT i;
++        for (i=0; dc && i<count; ++i)
++            if (NtGdiExtEscape(dc, NULL, 0, 0x5555494e, size, (const char *)(input+i), 0, NULL)!=1) break;
++        if (dc) NtUserReleaseDC(0, dc);
++        if (i) return i;
++    }
++    return NtUserSendInput(count,input,size);
++}
+ 
+ /***********************************************************************
+  *           get_locale_kbd_layout
+@@ -70,7 +85,7 @@
+     input.ki.dwFlags = dwFlags;
+     input.ki.time = 0;
+     input.ki.dwExtraInfo = dwExtraInfo;
+-    NtUserSendInput( 1, &input, sizeof(input) );
++    SendInput( 1, &input, sizeof(input) );
+ }
+ 
+ 
+@@ -89,7 +104,7 @@
+     input.mi.dwFlags = dwFlags;
+     input.mi.time = 0;
+     input.mi.dwExtraInfo = dwExtraInfo;
+-    NtUserSendInput( 1, &input, sizeof(input) );
++    SendInput( 1, &input, sizeof(input) );
+ }
+ 
+ 
+--- a/dlls/user32/user32.spec
++++ b/dlls/user32/user32.spec
+@@ -1005,7 +1005,7 @@
+ @ stdcall SendDlgItemMessageW(long long long long long)
+ @ stdcall SendIMEMessageExA(long long)
+ @ stdcall SendIMEMessageExW(long long)
+-@ stdcall SendInput(long ptr long) NtUserSendInput
++@ stdcall SendInput(long ptr long)
+ @ stdcall SendMessageA(long long long long)
+ @ stdcall SendMessageCallbackA(long long long long ptr long)
+ @ stdcall SendMessageCallbackW(long long long long ptr long)

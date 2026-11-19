@@ -1,0 +1,24 @@
+--- a/dlls/wevtapi/main.c
++++ b/dlls/wevtapi/main.c
+@@ -155,3 +155,10 @@
+     SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+     return NULL;
+ }
++
++EVT_HANDLE WINAPI EvtOpenPublisherMetadata(EVT_HANDLE session, const WCHAR *publisher,
++                                           const WCHAR *logfile, LCID locale, DWORD flags)
++{
++    SetLastError(ERROR_EVT_PUBLISHER_METADATA_NOT_FOUND);
++    return NULL;
++}
+--- a/dlls/wevtapi/wevtapi.spec
++++ b/dlls/wevtapi/wevtapi.spec
+@@ -34,7 +34,7 @@
+ @ stub EvtOpenEventMetadataEnum
+ @ stdcall EvtOpenLog(ptr wstr long)
+ @ stub EvtOpenPublisherEnum
+-@ stub EvtOpenPublisherMetadata
++@ stdcall EvtOpenPublisherMetadata(ptr wstr wstr long long)
+ @ stdcall EvtOpenSession(long ptr long long)
+ @ stdcall EvtQuery(ptr wstr wstr long)
+ @ stub EvtRender
